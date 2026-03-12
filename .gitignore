@@ -1,0 +1,4 @@
+.uv-cache
+.venv
+.idea
+__pycache__

@@ -46,4 +46,7 @@ Keeping agents "plain old procedural" has practical advantages:
 
 POPA is an attempt to build agents the way POJOs encouraged people to build software: with simple, explicit, language-native code first, and only as much abstraction as the problem actually needs.
 
+## Examples
+
+See the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
 
