@@ -16,7 +16,7 @@ class Agent:
 
         chunks = []
 
-        async for chunk in self.adapter.invoke(self.messages):
+        async for chunk in self.adapter.stream(self.messages):
             chunks.append(chunk)
             yield chunk
 
