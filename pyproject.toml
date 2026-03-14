@@ -10,27 +10,37 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
-  { name = "Amir" }
+    { name = "Amir" }
 ]
 keywords = ["agents", "python", "procedural", "llm"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
-  "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Topic :: Software Development :: Libraries :: Python Modules"
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.3.0",
+    "pytest>=8.3.0",
 ]
 examples = [
-  "fastapi>=0.116.0",
-  "pydantic>=2.11.0",
-  "uvicorn>=0.35.0",
+    "fastapi>=0.116.0",
+    "pydantic>=2.11.0",
+    "uvicorn>=0.35.0",
+]
+
+all = [
+    "anthropic>=0.20",
+    "google-generativeai>=0.5",
+    "dashscope>=1.14",
+    "fastapi>=0.116.0",
+    "pydantic>=2.11.0",
+    "uvicorn>=0.35.0",
+    "pytest>=8.3.0",
 ]
 
 [tool.hatch.build.targets.wheel]
