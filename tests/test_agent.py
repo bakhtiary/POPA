@@ -1,4 +1,4 @@
-from popa import Agent
+from popa.agent import Agent
 
 
 def test_agent_uses_hello_instruction() -> None:

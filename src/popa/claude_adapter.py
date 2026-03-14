@@ -16,10 +16,10 @@ class ClaudeAdapter:
 
         message = await self.client.messages.create(
             max_tokens=1024,
-            messages=translateToClaude(chat_history),
+            messages=translate_to_claude(chat_history),
             model="claude-opus-4-6",
         )
         return message
 
-def translateToClaude(chat_history):
-    pass
+def translate_to_claude(chat_history):
+    return []
