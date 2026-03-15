@@ -19,15 +19,19 @@ class Agent:
 
         chunks = []
 
-        async for chunk in self.adapter.stream(self.messages):
-            chunks.append(chunk)
-            yield chunk
+        cot_resp = None
+        while not cot_resp:
+            async for chunk in self.adapter.stream(self.messages):
+                chunks.append(chunk)
+                yield chunk
 
-        full_text = "".join(chunks)
+            full_text = "".join(chunks)
 
-        self.messages.append(AssistantMessage(full_text))
+            self.messages.append(AssistantMessage(full_text))
 
-        self.previous_response = self.cot_logic.get_response(full_text)
+            cot_resp = self.cot_logic.get_response(full_text)
+
+        self.previous_response = cot_resp
 
     async def ask_async(self, prompt: str) -> str:
         parts = []
