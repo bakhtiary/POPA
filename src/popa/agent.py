@@ -7,7 +7,7 @@ from popa.message import Message, InstructionMessage, UserMessage, AssistantMess
 
 class Agent:
     def __init__(self, instruction: str, adapter: LlmAdapter) -> None:
-        self.adapter = adapter
+        self.adapter: LlmAdapter = adapter
         self.messages: list[Message] = [InstructionMessage(instruction)]
 
     async def ask_stream(self, prompt: str) -> AsyncIterator[str]:
