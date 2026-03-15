@@ -17,3 +17,8 @@ class AssistantMessage(Message):
 class InstructionMessage(Message):
     def __init__(self, text):
         super().__init__("system", text)
+
+
+class CotMessage(Message):
+    def __init__(self, text):
+        super().__init__("cot", text)
