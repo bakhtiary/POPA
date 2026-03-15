@@ -1,14 +1,13 @@
 import asyncio
 from collections.abc import AsyncIterator
 
-from popa.agent_config import AgentConfig, load_config
+from popa.claude_adapter import LlmAdapter
 from popa.message import Message, InstructionMessage, UserMessage, AssistantMessage
 
 
 class Agent:
-    def __init__(self, instruction: str, config: AgentConfig | None = None) -> None:
-        self.config = config or load_config()
-        self.adapter = self.config.get_adapter()
+    def __init__(self, instruction: str, adapter: LlmAdapter) -> None:
+        self.adapter = adapter
         self.messages: list[Message] = [InstructionMessage(instruction)]
 
     async def ask_stream(self, prompt: str) -> AsyncIterator[str]:

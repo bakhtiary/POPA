@@ -1,13 +1,22 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+
 from anthropic import AsyncAnthropic
 
+from popa.message import InstructionMessage
 
-class ClaudeAdapter:
+
+class LlmAdapter:
+    async def stream(self, messages: list[InstructionMessage]) -> None:
+        raise NotImplementedError()
+
+
+class ClaudeAdapter(LlmAdapter):
     def __init__(self, api_key: str):
         self.client = AsyncAnthropic(api_key=api_key)
 
-    async def stream(self, messages):
+    async def stream(self, messages: list[InstructionMessage]) -> AsyncIterator[str]:
         payload = translate_to_claude(messages)
 
         async with self.client.messages.stream(
