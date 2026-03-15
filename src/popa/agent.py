@@ -44,4 +44,7 @@ class Agent:
         return asyncio.run(self.ask_async(prompt, parser_verifier))
 
 def create_simple_agent(system_instructions: str) -> Agent:
+    return Agent(system_instructions, load_config().get_adapter(), CotLogic(None))
+
+def create_cot_agent(system_instructions: str) -> Agent:
     return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"))
