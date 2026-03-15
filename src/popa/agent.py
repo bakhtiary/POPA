@@ -1,6 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator
 
+from popa.agent_config import load_config
 from popa.claude_adapter import LlmAdapter
 from popa.cot_logic import CotLogic
 from popa.message import Message, InstructionMessage, UserMessage, AssistantMessage
@@ -11,7 +12,7 @@ class Agent:
         self.adapter: LlmAdapter = adapter
         self.messages: list[Message] = [InstructionMessage(instruction)]
         self.previous_response = None
-        self.cot_logic = cot_logic
+        self.cot_logic: CotLogic = cot_logic
 
     async def ask_stream(self, prompt: str) -> AsyncIterator[str]:
         self.messages.append(UserMessage(prompt))
@@ -23,8 +24,8 @@ class Agent:
             yield chunk
 
         full_text = "".join(chunks)
-        assistantMessage = AssistantMessage(full_text)
-        self.messages.append(assistantMessage)
+
+        self.messages.append(AssistantMessage(full_text))
 
         self.previous_response = self.cot_logic.get_response(full_text)
 
@@ -34,5 +35,9 @@ class Agent:
             parts.append(chunk)
         return self.previous_response
 
-    def ask(self, prompt: str) -> str:
+    def ask(self, prompt: str) -> CotLogic:
         return asyncio.run(self.ask_async(prompt))
+
+
+def create_simple_agent(system_instructions: str) -> Agent:
+    return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"))

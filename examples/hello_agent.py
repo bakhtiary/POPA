@@ -1,6 +1,6 @@
-from popa import Agent
+from popa.agent import Agent, create_simple_agent
 
-agent = Agent("you are an agent designed to say hello to people")
+agent = create_simple_agent("You are a helpful greeter. Great incoming people.")
 
 result = agent.ask("A man arrives what do you say to him?")
 
