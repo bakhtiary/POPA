@@ -17,7 +17,6 @@ class Agent:
     async def ask_stream(self, prompt: str, parser_verifier=None) -> AsyncIterator[str]:
         self.messages.append(UserMessage(prompt))
 
-
         cot_resp = None
         while not cot_resp:
             chunks = []
@@ -49,3 +48,5 @@ def create_simple_agent(system_instructions: str) -> Agent:
 
 def create_cot_agent(system_instructions: str) -> Agent:
     return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"))
+
+

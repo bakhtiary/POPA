@@ -54,7 +54,6 @@ def test_all_messages_are_passed_to_adapter_once_and_only_once_everytime_the_ada
     assert len([x for x in fake_adapter.calls[-1] if fake_adapter.messages1[0] in x.content]) == 1
 
 
-
 def test_agent_cot_logic_tries_until_it_gets_an_answer() -> None:
     agent = Agent(
         "you are a master mathematician. Solve the provided question and provide the final answer.",
@@ -80,6 +79,21 @@ def test_verifier_skips_wrong_answer() -> None:
     assert result.cot_answer == 42
 
 def test_verifier_message_is_added_to_messages() -> None:
+    agent = Agent(
+        "you are a master mathematician. Solve the provided question and provide the final answer.",
+        adapter=FakeAdapter(
+            ["let me think", "let me think more", "<final_answer>forty two</final_answer>"],
+            ["<final_answer>42</final_answer>"]),
+        cot_logic=CotLogic("final_answer")
+    )
+
+    agent.ask("what is the sum of 1 to 50?", IntegerParser("error_message") )
+
+    forty_two_index = list(filter(lambda i: "forty two" in agent.messages[i].content , range(len(agent.messages))))[0]
+    assert agent.messages[forty_two_index+1].content == "error_message"
+
+
+def test_db_tool() -> None:
     agent = Agent(
         "you are a master mathematician. Solve the provided question and provide the final answer.",
         adapter=FakeAdapter(

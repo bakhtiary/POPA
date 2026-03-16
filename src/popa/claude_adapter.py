@@ -4,6 +4,7 @@ from typing import Protocol
 from anthropic import AsyncAnthropic
 
 from popa.message import Message
+from popa.tool import Tool
 
 
 class LlmAdapter(Protocol):
@@ -15,27 +16,27 @@ class ClaudeAdapter:
     def __init__(self, api_key: str):
         self.client = AsyncAnthropic(api_key=api_key)
 
-    async def stream(self, messages: list[Message]) -> AsyncIterator[str]:
-        payload = translate_to_claude(messages)
+    async def stream(self, system, messages: list[Message], tools:list[Tool]) -> AsyncIterator[str]:
+        cl_msg = messages_to_claude_mapper(messages)
+        cl_tools = tools_claude_mapper(tools)
 
         async with self.client.messages.stream(
             max_tokens=1024,
-            messages=payload["messages"],
             model="claude-opus-4-6",
-            system=payload["system"],
+            messages=cl_msg,
+            system=system,
+            tools=cl_tools,
         ) as stream:
             async for text in stream.text_stream:
                 yield text
 
+def tools_claude_mapper(tools):
+    pass
 
-def translate_to_claude(chat_history):
-    system_parts = []
+def messages_to_claude_mapper(chat_history):
     messages = []
 
     for message in chat_history:
-        if message.role == "system":
-            system_parts.append(message.content)
-            continue
 
         if message.role not in {"user", "assistant"}:
             raise ValueError(f"Unsupported message role: {message.role}")
@@ -47,7 +48,4 @@ def translate_to_claude(chat_history):
             }
         )
 
-    return {
-        "system": "\n\n".join(system_parts),
-        "messages": messages,
-    }
+    return messages
