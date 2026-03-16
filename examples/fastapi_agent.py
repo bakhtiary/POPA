@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from popa.agent import Agent, create_simple_agent
 
 app = FastAPI(title="POPA FastAPI Example")
-agent = create_simple_agent("you are an agent designed to say hello to people")
 
 
 class AskRequest(BaseModel):
@@ -22,4 +21,5 @@ def health() -> dict[str, str]:
 
 @app.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
+    agent = create_simple_agent("you are an agent designed to say hello to people")
     return AskResponse(result=agent.ask(request.prompt).content)
