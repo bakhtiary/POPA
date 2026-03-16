@@ -1,7 +1,7 @@
 from popa.agent import Agent
 from popa.claude_adapter import LlmAdapter
 from popa.cot_logic import CotLogic
-from popa.verifier_exception import VerifierException
+from popa.response_parser import ResponseParser, VerificationException
 
 
 class FakeAdapter(LlmAdapter):
@@ -58,12 +58,31 @@ def test_verifier_skips_wrong_answer() -> None:
         cot_logic=CotLogic("final_answer")
     )
 
-    result = agent.ask("what is the sum of 1 to 50?", verify_integer )
+    result = agent.ask("what is the sum of 1 to 50?", IntegerParser("") )
 
     assert result.cot_answer == 42
 
-def verify_integer(x):
-    try:
-        return int(x)
-    except ValueError:
-        raise VerifierException(f"the provided answer {x} is not an integer and could not be cast as such")
+def test_verifier_message_is_added_to_messages() -> None:
+    agent = Agent(
+        "you are a master mathematician. Solve the provided question and provide the final answer.",
+        adapter=FakeAdapter(
+            ["let me think", "let me think more", "<final_answer>forty two</final_answer>"],
+            ["<final_answer>42</final_answer>"]),
+        cot_logic=CotLogic("final_answer")
+    )
+
+    agent.ask("what is the sum of 1 to 50?", IntegerParser("error_message") )
+
+    forty_two_index = list(filter(lambda i: "forty two" in agent.messages[i].content , range(len(agent.messages))))[0]
+    assert agent.messages[forty_two_index+1].content == "error_message"
+
+
+class IntegerParser(ResponseParser):
+    def __init__(self, error_message):
+        self.error_message = error_message
+
+    def parse(self, message):
+        try:
+            return int(message)
+        except ValueError:
+            raise VerificationException(self.error_message)

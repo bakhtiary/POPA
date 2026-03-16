@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 
 from popa.message import CotMessage
-from popa.verifier_exception import VerifierException
+from popa.response_parser import VerificationException
 
 
 @dataclass
@@ -20,8 +20,8 @@ class CotLogic:
             match = re.findall(rf"<{self.answer_tag_name}>(.*?)</{self.answer_tag_name}>", full_text, re.DOTALL)
             if match:
                 try:
-                    res = parser_verifier(match[-1]) if parser_verifier else match[-1]
-                except VerifierException as e:
+                    res = parser_verifier.parse(match[-1]) if parser_verifier else match[-1]
+                except VerificationException as e:
                     return None, CotMessage(str(e))
                 return CotResponse(full_text, res), None
             else:

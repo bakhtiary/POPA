@@ -30,7 +30,8 @@ class Agent:
             self.messages.append(AssistantMessage(full_text))
 
             cot_resp, cot_message = self.cot_logic.get_response(full_text, parser_verifier)
-
+            if cot_message:
+                self.messages.append(cot_message)
 
         self.previous_response = cot_resp
 
