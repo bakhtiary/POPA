@@ -6,13 +6,15 @@ from popa.response_parser import ResponseParser, VerificationException
 
 class FakeAdapter(LlmAdapter):
     def __init__(self, messages1, messages2=None):
-        self.messages = messages1
+        self.messages1 = messages1
         self.messages2 = messages2
         self.call_count = 0
+        self.calls = []
     async def stream(self, messages):
+        self.calls.append(messages)
         self.call_count += 1
         if self.call_count == 1:
-            for text in self.messages:
+            for text in self.messages1:
                 yield text
         else:
             for text in self.messages2:
@@ -37,6 +39,21 @@ def test_agent_cot_logic() -> None:
     result = agent.ask("what is the sum of 1 to 50?")
 
     assert result.cot_answer == "1300"
+
+
+def test_all_messages_are_passed_to_adapter_once_and_only_once_everytime_the_adapter_is_called() -> None:
+    fake_adapter = FakeAdapter(["let me think"], ["<final_answer>1300</final_answer>"])
+    agent = Agent(
+        "you are a master mathematician. Solve the provided question and provide the final answer.",
+        adapter=fake_adapter,
+        cot_logic=CotLogic("final_answer")
+    )
+
+    agent.ask("what is the sum of 1 to 50?")
+
+    assert len([x for x in fake_adapter.calls[-1] if fake_adapter.messages1[0] in x.content]) == 1
+
+
 
 def test_agent_cot_logic_tries_until_it_gets_an_answer() -> None:
     agent = Agent(

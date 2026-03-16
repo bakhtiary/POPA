@@ -17,10 +17,10 @@ class Agent:
     async def ask_stream(self, prompt: str, parser_verifier=None) -> AsyncIterator[str]:
         self.messages.append(UserMessage(prompt))
 
-        chunks = []
 
         cot_resp = None
         while not cot_resp:
+            chunks = []
             async for chunk in self.adapter.stream(self.messages):
                 chunks.append(chunk)
                 yield chunk
