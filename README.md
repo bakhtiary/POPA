@@ -1,11 +1,35 @@
 ﻿
-# POPA
+# POPAgent
 
 POPA stands for **Plain Old Procedural Agents**.
 
 The project is inspired by the idea behind **POJOs**: Plain Old Java Objects. POJOs became useful because they pushed back against heavyweight frameworks, hidden conventions, and unnecessary abstractions. Instead of forcing developers to model everything through special containers or framework-specific base classes, POJOs let code stay close to the language itself.
 
-POPA applies the same instinct to agents.
+POPA applies the same instinct to agents. In short POPA is an attempt to build agents the way
+POJOs encouraged people to build software: with simple, explicit, language-native code first, 
+and only as much abstraction as the problem actually needs.
+
+## Installation
+
+POPA requires Python 3.11 or newer.
+
+Install it with `pip`:
+
+```bash
+pip install popagent
+```
+
+Or install it with `uv`:
+
+```bash
+uv add popagent
+```
+
+
+## Examples
+
+See the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
+
 
 ## Why POPA
 
@@ -41,12 +65,3 @@ Keeping agents "plain old procedural" has practical advantages:
 - easier local reasoning about behavior
 - simpler testing and mocking
 - easier onboarding for engineers who already know Python
-
-## In Short
-
-POPA is an attempt to build agents the way POJOs encouraged people to build software: with simple, explicit, language-native code first, and only as much abstraction as the problem actually needs.
-
-## Examples
-
-See the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
-
