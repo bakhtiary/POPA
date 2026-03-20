@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from popa.message import CotMessage
+from popa.message import CotLogicMessage
 from popa.response_parser import VerificationException
 
 
@@ -22,7 +22,7 @@ class CotLogic:
                 try:
                     res = parser_verifier.parse(match[-1]) if parser_verifier else match[-1]
                 except VerificationException as e:
-                    return None, CotMessage(str(e))
+                    return None, CotLogicMessage(str(e))
                 return CotResponse(full_text, res), None
             else:
                 return None, None

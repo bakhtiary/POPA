@@ -3,3 +3,4 @@
 .idea
 __pycache__
 .env
+examples/chinook.db

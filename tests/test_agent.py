@@ -95,7 +95,7 @@ def test_verifier_message_is_added_to_messages() -> None:
 
 def test_db_tool() -> None:
     agent = Agent(
-        "you are a master mathematician. Solve the provided question and provide the final answer.",
+        "you are a skillful tool user. the provided tool ",
         adapter=FakeAdapter(
             ["let me think", "let me think more", "<final_answer>forty two</final_answer>"],
             ["<final_answer>42</final_answer>"]),

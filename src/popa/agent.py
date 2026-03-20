@@ -4,35 +4,46 @@ from collections.abc import AsyncIterator
 from popa.agent_config import load_config
 from popa.claude_adapter import LlmAdapter
 from popa.cot_logic import CotLogic, CotResponse
-from popa.message import Message, InstructionMessage, UserMessage, AssistantMessage
+from popa.message import Message, UserMessage, AssistantMessage, ToolUseMessage, ToolResponseMessage
+from popa.tool import ToolDescription
 
 
 class Agent:
-    def __init__(self, instruction: str, adapter: LlmAdapter, cot_logic: CotLogic) -> None:
+    def __init__(self, instruction: str, adapter: LlmAdapter, cot_logic: CotLogic, tools: list[ToolDescription]) -> None:
         self.adapter: LlmAdapter = adapter
-        self.messages: list[Message] = [InstructionMessage(instruction)]
+        self.system_instruction = instruction
+        self.messages: list[Message] = []
         self.previous_response: CotResponse = None
+        self.previous_messages = []
         self.cot_logic: CotLogic = cot_logic
+        self.tools = {x.name:x for x in tools}
 
     async def ask_stream(self, prompt: str, parser_verifier=None) -> AsyncIterator[str]:
-        self.messages.append(UserMessage(prompt))
+        self.previous_messages = []
+        self._add_new_message(UserMessage(prompt))
 
         cot_resp = None
         while not cot_resp:
-            chunks = []
-            async for chunk in self.adapter.stream(self.messages):
-                chunks.append(chunk)
+            async for chunk in self.adapter.stream(self.system_instruction, self.messages, tools=list(self.tools.values())):
                 yield chunk
 
-            full_text = "".join(chunks)
+            model_messages = self.adapter.get_previous_response()
 
-            self.messages.append(AssistantMessage(full_text))
-
-            cot_resp, cot_message = self.cot_logic.get_response(full_text, parser_verifier)
-            if cot_message:
-                self.messages.append(cot_message)
+            for message in model_messages:
+                self._add_new_message(message)
+                if isinstance(message, ToolUseMessage):
+                    tool_response = self._run_tool(message.name, message.id,message.input)
+                    self._add_new_message(tool_response)
+                elif isinstance(message, AssistantMessage):
+                    cot_resp, cot_message = self.cot_logic.get_response(message, parser_verifier)
+                    if cot_message:
+                        self._add_new_message(cot_message)
 
         self.previous_response = cot_resp
+
+    def _add_new_message(self, message):
+        self.messages.append(message)
+        self.previous_messages.append(message)
 
     async def ask_async(self, prompt: str, parser_verifier=None) -> CotResponse:
         parts = []
@@ -43,10 +54,13 @@ class Agent:
     def ask(self, prompt: str, parser_verifier=None) -> CotResponse:
         return asyncio.run(self.ask_async(prompt, parser_verifier))
 
+    def _run_tool(self, name, id_, input_):
+        return ToolResponseMessage(id_, self.tools[name].run(input_))
+
 def create_simple_agent(system_instructions: str) -> Agent:
     return Agent(system_instructions, load_config().get_adapter(), CotLogic(None))
 
-def create_cot_agent(system_instructions: str) -> Agent:
-    return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"))
+def create_cot_agent(system_instructions: str, tools=None) -> Agent:
+    return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"), tools=[] if tools is None else tools)
 
 
