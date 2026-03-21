@@ -3,7 +3,7 @@ from collections.abc import AsyncIterator
 
 from popa.agent_config import load_config
 from popa.claude_adapter import LlmAdapter
-from popa.cot_logic import CotLogic, CotResponse
+from popa.cot_logic import CotLogic
 from popa.message import Message, UserMessage, AssistantMessage, ToolUseMessage, ToolResponseMessage
 from popa.tool import ToolDescription
 
@@ -13,7 +13,7 @@ class Agent:
         self.adapter: LlmAdapter = adapter
         self.system_instruction = instruction
         self.messages: list[Message] = []
-        self.previous_response: CotResponse = None
+        self.previous_response = None
         self.previous_messages = []
         self.cot_logic: CotLogic = cot_logic
         self.tools = {x.name:x for x in tools}
@@ -24,7 +24,7 @@ class Agent:
 
         cot_resp = None
         while not cot_resp:
-            async for chunk in self.adapter.stream(self.system_instruction, self.messages, tools=list(self.tools.values())):
+            async for chunk in self.adapter.stream(self.system_instruction+self.cot_logic.get_cot_system_message(), self.messages, tools=list(self.tools.values())):
                 yield chunk
 
             model_messages = self.adapter.get_previous_response()
@@ -35,7 +35,7 @@ class Agent:
                     tool_response = self._run_tool(message.name, message.id,message.input)
                     self._add_new_message(tool_response)
                 elif isinstance(message, AssistantMessage):
-                    cot_resp, cot_message = self.cot_logic.get_response(message, parser_verifier)
+                    cot_resp, cot_message = self.cot_logic.get_response(message.content, parser_verifier)
                     if cot_message:
                         self._add_new_message(cot_message)
 
@@ -45,13 +45,13 @@ class Agent:
         self.messages.append(message)
         self.previous_messages.append(message)
 
-    async def ask_async(self, prompt: str, parser_verifier=None) -> CotResponse:
+    async def ask_async(self, prompt: str, parser_verifier=None):
         parts = []
         async for chunk in self.ask_stream(prompt, parser_verifier):
             parts.append(chunk)
         return self.previous_response
 
-    def ask(self, prompt: str, parser_verifier=None) -> CotResponse:
+    def ask(self, prompt: str, parser_verifier=None):
         return asyncio.run(self.ask_async(prompt, parser_verifier))
 
     def _run_tool(self, name, id_, input_):

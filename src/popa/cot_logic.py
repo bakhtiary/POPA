@@ -4,13 +4,6 @@ from dataclasses import dataclass
 from popa.message import CotLogicMessage
 from popa.response_parser import VerificationException
 
-
-@dataclass
-class CotResponse:
-    content: str
-    cot_answer: str
-
-
 class CotLogic:
     def __init__(self, answer_tag_name):
         self.answer_tag_name = answer_tag_name
@@ -19,12 +12,21 @@ class CotLogic:
         if self.answer_tag_name:
             match = re.findall(rf"<{self.answer_tag_name}>(.*?)</{self.answer_tag_name}>", full_text, re.DOTALL)
             if match:
-                try:
-                    res = parser_verifier.parse(match[-1]) if parser_verifier else match[-1]
-                except VerificationException as e:
-                    return None, CotLogicMessage(str(e))
-                return CotResponse(full_text, res), None
+                return self.parse_and_verify(match[-1], parser_verifier)
             else:
-                return None, None
+                return None, CotLogicMessage(f""" 
+Some message was provided but it did not match the {self.answer_tag_name} regex.
+If a final answer is being provided, please give it in the <{self.answer_tag_name}>(.*?)</{self.answer_tag_name}> tags."
+""")
         else:
-            return CotResponse(full_text, None), None
+            return self.parse_and_verify(full_text, parser_verifier)
+
+    def parse_and_verify(self, message_to_parse: str, parser_verifier) -> tuple:
+        try:
+            res = parser_verifier.parse(message_to_parse) if parser_verifier else message_to_parse
+            return res, None
+        except VerificationException as e:
+            return None, CotLogicMessage(str(e))
+
+    def get_cot_system_message(self):
+        return f" Provide the final response inside a <{self.answer_tag_name}> </{self.answer_tag_name}> tag."

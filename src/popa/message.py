@@ -4,7 +4,7 @@ class Message:
 
 class CotLogicMessage:
     def __init__(self, text):
-        super().__init__("cot_logic")
+        super().__init__()
         self.content = text
 
 
