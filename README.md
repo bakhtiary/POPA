@@ -16,26 +16,24 @@ POPA requires Python 3.11 or newer.
 Install it with `pip`:
 
 ```bash
-pip install popagent
+pip install git+https://github.com/bakhtiary/POPA
 ```
 
 Or install it with `uv`:
 
 ```bash
-uv add popagent
+uv add git+https://github.com/bakhtiary/POPA
 ```
-
 
 ## Examples
 
 See the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
 
-
 ## Why POPA
 
 A lot of agent tooling starts by introducing a new DSL, a custom runtime model, or a framework-specific abstraction layer. That can make simple things look clever, but it often makes real systems harder to inspect, test, refactor, and maintain.
 
-POPA takes the opposite approach:
+POPA proposes a more pythonic approach:
 
 - agents should be written as normal Python code
 - control flow should be procedural and explicit
