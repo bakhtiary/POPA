@@ -16,13 +16,13 @@ POPA requires Python 3.11 or newer.
 Install it with `pip`:
 
 ```bash
-pip install git+https://github.com/bakhtiary/POPA
+pip install git+https://github.com/bakhtiary/POPA.git@v0.1.0
 ```
 
 Or install it with `uv`:
 
 ```bash
-uv add git+https://github.com/bakhtiary/POPA
+uv add git+https://github.com/bakhtiary/POPA.git@v0.1.0
 ```
 
 ## Examples
