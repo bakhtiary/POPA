@@ -58,7 +58,7 @@ class Agent:
         return ToolResponseMessage(id_, self.tools[name].run(input_))
 
 def create_simple_agent(system_instructions: str) -> Agent:
-    return Agent(system_instructions, load_config().get_adapter(), CotLogic(None))
+    return Agent(system_instructions, load_config().get_adapter(), CotLogic(None), tools=[])
 
 def create_cot_agent(system_instructions: str, tools=None) -> Agent:
     return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"), tools=[] if tools is None else tools)
