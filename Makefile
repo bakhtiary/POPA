@@ -4,7 +4,7 @@ run-01-example:
 
 run-02-example:
 	docker build -f examples/Dockerfile -t popa-example .
-	docker run --rm -e ANTHROPIC_API_KEY="$${ANTHROPIC_API_KEY}" popa-example python examples/02_fastapi.py
+	docker run -it --rm -p 8000:8000 -e ANTHROPIC_API_KEY="$${ANTHROPIC_API_KEY}" popa-example python examples/02_fastapi.py
 
 run-03-example:
 	docker build -f examples/Dockerfile -t popa-example .

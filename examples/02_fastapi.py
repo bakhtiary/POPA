@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+import uvicorn
 
 from popa.agent import Agent, create_simple_agent
 
@@ -23,3 +24,6 @@ def health() -> dict[str, str]:
 def ask(request: AskRequest) -> AskResponse:
     agent = create_simple_agent("you are an agent designed to say hello to people")
     return AskResponse(result=agent.ask(request.prompt).content)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
