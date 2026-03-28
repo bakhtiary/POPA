@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
 
-from popa.builder import create_agent
+from popa.llm_adapter.builder import create_agent
 
 app = FastAPI(title="POPA FastAPI Example")
 

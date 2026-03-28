@@ -2,7 +2,7 @@ import os
 import sqlite3
 import urllib
 
-from popa.builder import create_agent
+from popa.llm_adapter.builder import create_agent
 from popa.tool import DatabaseTool
 
 

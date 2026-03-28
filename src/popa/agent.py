@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator
 
-from popa.llm_adapter.anthropic import LlmAdapter
+from popa.llm_adapter.interface import LlmAdapter
 from popa.cot_logic import CotLogic
 from popa.message import Message, UserMessage, AssistantMessage, ToolUseMessage, ToolResponseMessage
 from popa.tool import ToolDescription
