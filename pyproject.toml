@@ -22,6 +22,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
+dependencies = [
+    "config>=0.5.1",
+]
 
 [project.optional-dependencies]
 dev = [

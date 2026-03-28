@@ -2,14 +2,14 @@ import os
 import sqlite3
 import urllib
 
-from popa.agent import  create_cot_agent
+from popa.builder import create_agent
 from popa.tool import DatabaseTool
 
 
 def main():
     conn = _get_chinook_sqlite_db_conn_download_if_it_dont_exist()
 
-    agent = create_cot_agent("""
+    agent = create_agent(system_instructions="""
     You are a database assistant that has access to a chinook sqlite database. 
     Provide concise answers to the questions that you are asked.
     Use the provided database tool to query the database when needed.

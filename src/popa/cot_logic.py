@@ -5,7 +5,7 @@ from popa.message import CotLogicMessage
 from popa.response_parser import VerificationException
 
 class CotLogic:
-    def __init__(self, answer_tag_name):
+    def __init__(self, answer_tag_name: str):
         self.answer_tag_name = answer_tag_name
 
     def get_response(self, full_text, parser_verifier):

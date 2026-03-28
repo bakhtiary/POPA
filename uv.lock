@@ -364,6 +364,15 @@ wheels = [
 ]
 
 [[package]]
+name = "config"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/a9/c44e131d60a97a7615e5d6b4f998e373df51a8e385d89fb37232d7b7e5ec/config-0.5.1.zip", hash = "sha256:2dd4a03aa383d30711d5a3325a1858de225328d61950a85be5b74c100f63016d", size = 90284, upload-time = "2021-09-11T08:10:17.462Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/3c/0dba475f1833b475e292d7c6b19464a206a18498979c2d5bfb37ca5ed27c/config-0.5.1-py2.py3-none-any.whl", hash = "sha256:79ffa009ff2663cc8ca29e56bcec031c044609d4bafaa4f884132a413101ce84", size = 20316, upload-time = "2021-09-11T08:10:15.149Z" },
+]
+
+[[package]]
 name = "cryptography"
 version = "46.0.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1073,6 +1082,9 @@ wheels = [
 name = "popa"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "config" },
+]
 
 [package.optional-dependencies]
 all = [
@@ -1096,6 +1108,7 @@ examples = [
 [package.metadata]
 requires-dist = [
     { name = "anthropic", marker = "extra == 'all'", specifier = ">=0.20" },
+    { name = "config", specifier = ">=0.5.1" },
     { name = "dashscope", marker = "extra == 'all'", specifier = ">=1.14" },
     { name = "fastapi", marker = "extra == 'all'", specifier = ">=0.116.0" },
     { name = "fastapi", marker = "extra == 'examples'", specifier = ">=0.116.0" },

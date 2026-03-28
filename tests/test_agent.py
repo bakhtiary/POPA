@@ -1,5 +1,5 @@
 from popa.agent import Agent
-from popa.claude_adapter import LlmAdapter
+from popa.llm_adapter.anthropic import LlmAdapter
 from popa.cot_logic import CotLogic
 from popa.message import AssistantMessage
 from popa.response_parser import ResponseParser, VerificationException

@@ -1,8 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator
 
-from popa.agent_config import load_config
-from popa.claude_adapter import LlmAdapter
+from popa.llm_adapter.anthropic import LlmAdapter
 from popa.cot_logic import CotLogic
 from popa.message import Message, UserMessage, AssistantMessage, ToolUseMessage, ToolResponseMessage
 from popa.tool import ToolDescription
@@ -56,11 +55,4 @@ class Agent:
 
     def _run_tool(self, name, id_, input_):
         return ToolResponseMessage(id_, self.tools[name].run(input_))
-
-def create_simple_agent(system_instructions: str) -> Agent:
-    return Agent(system_instructions, load_config().get_adapter(), CotLogic(None), tools=[])
-
-def create_cot_agent(system_instructions: str, tools=None) -> Agent:
-    return Agent(system_instructions, load_config().get_adapter(), CotLogic("final_answer"), tools=[] if tools is None else tools)
-
 
