@@ -5,7 +5,7 @@ from popa.message import CotLogicMessage
 from popa.response_parser import VerificationException
 
 class CotLogic:
-    def __init__(self, answer_tag_name: str):
+    def __init__(self, answer_tag_name: str| None):
         self.answer_tag_name = answer_tag_name
 
     def get_response(self, full_text, parser_verifier):
@@ -29,4 +29,7 @@ If a final answer is being provided, please give it in the <{self.answer_tag_nam
             return None, CotLogicMessage(str(e))
 
     def get_cot_system_message(self):
-        return f" Provide the final response inside a <{self.answer_tag_name}> </{self.answer_tag_name}> tag."
+        if self.answer_tag_name:
+            return f" Provide the final response inside a <{self.answer_tag_name}> </{self.answer_tag_name}> tag."
+        else:
+            return ""

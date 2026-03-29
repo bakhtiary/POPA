@@ -32,7 +32,7 @@ class DefaultConfig(AgentConfig):
         return "You are a helpful agent that uses available tools to solve posed problems."
 
     def get_cot(self):
-        return CotLogic("final_answer")
+        return CotLogic(None)
 
     def get_tools(self):
         return []
