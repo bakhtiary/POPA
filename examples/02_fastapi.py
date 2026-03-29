@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
+from starlette.responses import RedirectResponse
 
 from popa.llm_adapter.builder import create_agent
 
@@ -14,16 +15,19 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     result: str
 
+@app.get("/")
+def redirect_to_docs():
+    return RedirectResponse("/docs")
+
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
-
 @app.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
     agent = create_agent(system_instructions="you are an agent designed to say hello to people")
-    return AskResponse(result=agent.ask(request.prompt).content)
+    return AskResponse(result=agent.ask(request.prompt))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)

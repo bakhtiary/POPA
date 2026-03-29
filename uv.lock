@@ -1061,6 +1061,25 @@ wheels = [
 ]
 
 [[package]]
+name = "openai"
+version = "2.30.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "tqdm" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/88/15/52580c8fbc16d0675d516e8749806eda679b16de1e4434ea06fb6feaa610/openai-2.30.0.tar.gz", hash = "sha256:92f7661c990bda4b22a941806c83eabe4896c3094465030dd882a71abe80c885", size = 676084, upload-time = "2026-03-25T22:08:59.96Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/9e/5bfa2270f902d5b92ab7d41ce0475b8630572e71e349b2a4996d14bdda93/openai-2.30.0-py3-none-any.whl", hash = "sha256:9a5ae616888eb2748ec5e0c5b955a51592e0b201a11f4262db920f2a78c5231d", size = 1146656, upload-time = "2026-03-25T22:08:58.2Z" },
+]
+
+[[package]]
 name = "packaging"
 version = "26.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1092,6 +1111,7 @@ all = [
     { name = "dashscope" },
     { name = "fastapi" },
     { name = "google-generativeai" },
+    { name = "openai" },
     { name = "pydantic" },
     { name = "pytest" },
     { name = "uvicorn" },
@@ -1113,6 +1133,7 @@ requires-dist = [
     { name = "fastapi", marker = "extra == 'all'", specifier = ">=0.116.0" },
     { name = "fastapi", marker = "extra == 'examples'", specifier = ">=0.116.0" },
     { name = "google-generativeai", marker = "extra == 'all'", specifier = ">=0.5" },
+    { name = "openai", marker = "extra == 'all'", specifier = ">=1.0" },
     { name = "pydantic", marker = "extra == 'all'", specifier = ">=2.11.0" },
     { name = "pydantic", marker = "extra == 'examples'", specifier = ">=2.11.0" },
     { name = "pytest", marker = "extra == 'all'", specifier = ">=8.3.0" },

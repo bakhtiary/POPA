@@ -3,7 +3,7 @@ from collections.abc import AsyncIterator
 from anthropic import AsyncAnthropic
 from anthropic.types import ToolParam
 
-from popa.llm_adapter.local_disk_cache import DiskBasedCacher
+from popa.llm_adapter.local_disk_cache import LocalDiskCache
 from popa.message import Message, ToolUseMessage, AssistantMessage, ToolResponseMessage
 from popa.tool import ToolDescription, Tool
 
@@ -12,7 +12,7 @@ class ClaudeAdapter:
     def __init__(self, api_key: str):
         self.client = AsyncAnthropic(api_key=api_key)
         self.previous_response=None
-        self.client_cacher = DiskBasedCacher("./cache/claude_adapter")
+        self.client_cacher = LocalDiskCache("./cache/claude_adapter")
 
     def get_previous_response(self):
         return self.previous_response
