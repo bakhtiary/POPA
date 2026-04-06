@@ -1,4 +1,4 @@
-# generate_predictions.py
+import argparse
 import json
 import sqlite3
 from pathlib import Path
@@ -6,10 +6,12 @@ from pathlib import Path
 from popa.llm_adapter.builder import create_agent
 from popa.tool import DatabaseTool
 
-# ── Config ────────────────────────────────────────────────────────────────────
-DATA_PATH = "mini_dev/mini_dev_data/mini_dev_sqlite.json"
-DB_ROOT   = "mini_dev/mini_dev_data/dev_databases"
-OUT_PATH  = "mini_dev/llm/exp_result/my_predictions.json"
+dataset_root = Path(__file__).parent
+
+
+DATA_PATH = dataset_root/"bird_mini_dev_data/data/mini_dev_sqlite-00000-of-00001.json"
+DB_ROOT   = dataset_root/"mini_dev/mini_dev_data/dev_databases"
+OUT_PATH  = dataset_root/"mini_dev/llm/exp_result/my_predictions.json"
 
 # ── Your model (fill this in) ─────────────────────────────────────────────────
 def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
@@ -34,9 +36,43 @@ def get_schema(db_path: str) -> str:
     conn.close()
     return schema
 
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the BirdBench experiment.")
+    parser.add_argument(
+        "--select-samples",
+        action="append",
+        default=[],
+        metavar="QUESTION_ID",
+        help="Run only the specified question_id values. Repeat the flag or pass a comma-separated list.",
+    )
+    return parser.parse_args()
+
+
+def parse_selected_question_ids(raw_values: list[str]) -> set[str]:
+    selected_ids: set[str] = set()
+    for value in raw_values:
+        for item in value.split(","):
+            stripped = item.strip()
+            if stripped:
+                selected_ids.add(stripped)
+    return selected_ids
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
+    args = parse_args()
     samples = json.loads(Path(DATA_PATH).read_text())
+    selected_ids = parse_selected_question_ids(args.select_samples)
+
+    if selected_ids:
+        samples = [sample for sample in samples if str(sample["question_id"]) in selected_ids]
+        missing_ids = selected_ids.difference({str(sample["question_id"]) for sample in samples})
+        if missing_ids:
+            print(
+                "Warning: question_id values not found: "
+                + ", ".join(sorted(missing_ids))
+            )
+
     predictions = {}
 
     for sample in samples:
