@@ -33,10 +33,11 @@ class Agent:
                 if isinstance(message, ToolUseMessage):
                     tool_response = self._run_tool(message.name, message.id,message.input)
                     self._add_new_message(tool_response)
-                elif isinstance(message, AssistantMessage):
-                    cot_resp, cot_message = self.cot_logic.get_response(message.content, parser_verifier)
-                    if cot_message:
-                        self._add_new_message(cot_message)
+
+            if isinstance(self.messages[-1], AssistantMessage):
+                cot_resp, cot_message = self.cot_logic.get_response(self.messages[-1].content, parser_verifier)
+                if cot_message:
+                    self._add_new_message(cot_message)
 
         self.previous_response = cot_resp
 

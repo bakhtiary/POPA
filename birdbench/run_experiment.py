@@ -6,12 +6,11 @@ from pathlib import Path
 from popa.llm_adapter.builder import create_agent
 from popa.tool import DatabaseTool
 
-dataset_root = Path(__file__).parent
+DATASET_ROOT = Path(__file__).parent
 
-
-DATA_PATH = dataset_root/"bird_mini_dev_data/data/mini_dev_sqlite-00000-of-00001.json"
-DB_ROOT   = dataset_root/"mini_dev/mini_dev_data/dev_databases"
-OUT_PATH  = dataset_root/"mini_dev/llm/exp_result/my_predictions.json"
+QUERY_DATABASE = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/mini_dev_sqlite.json"
+DB_ROOT   = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/dev_databases"
+OUT_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/my_predictions.json"
 
 # ── Your model (fill this in) ─────────────────────────────────────────────────
 def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
@@ -23,18 +22,10 @@ def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
     """, tools=[DatabaseTool(db_conn, "sqlite3")]
     )
 
-    agent.ask("can you answer this question using the available database tool:", question)
+    agent.ask(f"can you answer this question using the available database tool:{question}")
     result = agent.ask("please give the sql query that provides the correct answer.")
 
     return result
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-def get_schema(db_path: str) -> str:
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL")
-    schema = "\n".join(row[0] for row in cursor.fetchall())
-    conn.close()
-    return schema
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,10 +49,11 @@ def parse_selected_question_ids(raw_values: list[str]) -> set[str]:
                 selected_ids.add(stripped)
     return selected_ids
 
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     args = parse_args()
-    samples = json.loads(Path(DATA_PATH).read_text())
+    samples = json.loads(Path(QUERY_DATABASE).read_text())
     selected_ids = parse_selected_question_ids(args.select_samples)
 
     if selected_ids:
@@ -81,16 +73,11 @@ def main():
         question = sample["question"]
 
         db_path  = f"{DB_ROOT}/{db_id}/{db_id}.sqlite"
-        schema   = get_schema(db_path)
+        print(db_path)
         conn     = sqlite3.connect(db_path)
 
-        try:
-            sql = my_model(question, schema, conn)
-        except Exception as e:
-            print(f"[{q_id}] ERROR: {e}")
-            sql = "SELECT 1"  # fallback so eval doesn't crash
-        finally:
-            conn.close()
+        sql = my_model(question, None, conn)
+        conn.close()
 
         predictions[str(q_id)] = f"{sql}\t----- bird -----\t{db_id}"
         print(f"[{q_id}] {db_id}: {sql[:80]}")

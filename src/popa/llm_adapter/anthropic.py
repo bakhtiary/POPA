@@ -4,7 +4,7 @@ from anthropic import AsyncAnthropic
 from anthropic.types import ToolParam
 
 from popa.llm_adapter.local_disk_cache import LocalDiskCache
-from popa.message import Message, ToolUseMessage, AssistantMessage, ToolResponseMessage
+from popa.message import Message, ToolUseMessage, AssistantMessage, ToolResponseMessage, UserMessage, CotLogicMessage
 from popa.tool import ToolDescription, Tool
 
 
@@ -92,14 +92,21 @@ def popa_messages_to_claude_mapper(chat_history):
 
     for message in chat_history:
 
-        if message.role in {"user", "assistant"}:
+        if isinstance(message, UserMessage):
             messages.append(
                 {
-                    "role": message.role,
+                    "role": "user",
                     "content": message.content,
                 }
             )
-        elif message.role == "cot_logic":
+        elif isinstance(message, AssistantMessage):
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": message.content,
+                }
+            )
+        elif isinstance(message, CotLogicMessage):
             messages.append(
                 {
                     "role": "user",
