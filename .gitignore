@@ -4,3 +4,4 @@
 __pycache__
 .env
 examples/chinook.db
+.codex
