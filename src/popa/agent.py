@@ -34,8 +34,9 @@ class Agent:
                     tool_response = self._run_tool(message.name, message.id,message.input)
                     self._add_new_message(tool_response)
 
-            if isinstance(self.messages[-1], AssistantMessage):
-                cot_resp, cot_message = self.cot_logic.get_response(self.messages[-1].content, parser_verifier)
+            last_message = self.messages[-1]
+            if isinstance(last_message, AssistantMessage):
+                cot_resp, cot_message = self.cot_logic.get_response(last_message.content, parser_verifier)
                 if cot_message:
                     self._add_new_message(cot_message)
 

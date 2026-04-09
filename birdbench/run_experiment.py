@@ -4,6 +4,7 @@ import sqlite3
 from pathlib import Path
 
 from popa.llm_adapter.builder import create_agent
+from popa.response_parser import VerificationException
 from popa.tool import DatabaseTool
 
 DATASET_ROOT = Path(__file__).parent
@@ -12,7 +13,18 @@ QUERY_DATABASE = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/mini_dev_sq
 DB_ROOT   = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/dev_databases"
 OUT_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/my_predictions.json"
 
-# ── Your model (fill this in) ─────────────────────────────────────────────────
+class DatabaseVerifier(object):
+    def __init__(self, db_conn: sqlite3.Connection):
+        self.db_conn = db_conn
+
+    def parse(self, answer: str):
+        try:
+            self.db_conn.execute(answer)
+            return answer
+        except Exception as e:
+            raise VerificationException(e)
+
+
 def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
 
     agent = create_agent(system_instructions="""
@@ -23,7 +35,7 @@ def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
     )
 
     agent.ask(f"can you answer this question using the available database tool:{question}")
-    result = agent.ask("please give the sql query that provides the correct answer.")
+    result = agent.ask("please give the sql query that provides the correct answer.", parser_verifier=DatabaseVerifier(db_conn))
 
     return result
 

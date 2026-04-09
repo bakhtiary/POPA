@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from popa.message import CotLogicMessage
 from popa.response_parser import VerificationException
 
+
+class ParserVerifier:
+    def parse(self, answer):
+        raise NotImplementedError()
+
 class CotLogic:
     def __init__(self, answer_tag_name: str| None):
         self.answer_tag_name = answer_tag_name
