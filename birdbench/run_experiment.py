@@ -13,7 +13,7 @@ DATASET_ROOT = Path(__file__).parent
 QUERY_DATABASE = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/mini_dev_sqlite.json"
 DB_ROOT   = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/dev_databases"
 OUT_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/my_predictions.json"
-LOG_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/run_experiment.log"
+LOG_PATH  = DATASET_ROOT / "run_experiment.log"
 
 logger = logging.getLogger(__name__)
 
