@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import sqlite3
 from pathlib import Path
 
@@ -12,6 +13,9 @@ DATASET_ROOT = Path(__file__).parent
 QUERY_DATABASE = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/mini_dev_sqlite.json"
 DB_ROOT   = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/dev_databases"
 OUT_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/my_predictions.json"
+LOG_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/run_experiment.log"
+
+logger = logging.getLogger(__name__)
 
 class DatabaseVerifier(object):
     def __init__(self, db_conn: sqlite3.Connection):
@@ -72,14 +76,29 @@ def parse_selected_sample_range(raw_value: str | None) -> slice | None:
     return slice(start, end)
 
 
+def setup_logging() -> None:
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+        handlers=[logging.FileHandler(LOG_PATH, mode="w", encoding="utf-8")],
+        force=True,
+    )
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
+    setup_logging()
     args = parse_args()
+    logger.info("Starting BirdBench experiment")
     samples = json.loads(Path(QUERY_DATABASE).read_text())
     selected_range = parse_selected_sample_range(args.select_samples)
 
     if selected_range is not None:
         samples = samples[selected_range]
+        logger.info("Selected sample range %s:%s (%d samples)", selected_range.start, selected_range.stop, len(samples))
+    else:
+        logger.info("Running all samples (%d samples)", len(samples))
 
     predictions = {}
 
@@ -89,18 +108,19 @@ def main():
         question = sample["question"]
 
         db_path  = f"{DB_ROOT}/{db_id}/{db_id}.sqlite"
-        print(db_path)
+        logger.info("Running sample question_id=%s db_id=%s db_path=%s", q_id, db_id, db_path)
         conn     = sqlite3.connect(db_path)
 
         sql = my_model(question, None, conn)
         conn.close()
 
         predictions[str(q_id)] = f"{sql}\t----- bird -----\t{db_id}"
-        print(f"[{q_id}] {db_id}: {sql[:80]}")
+        logger.info("Completed sample question_id=%s db_id=%s sql=%s", q_id, db_id, sql[:80])
 
     Path(OUT_PATH).parent.mkdir(parents=True, exist_ok=True)
     Path(OUT_PATH).write_text(json.dumps(predictions, indent=2))
-    print(f"\nSaved {len(predictions)} predictions to {OUT_PATH}")
+    logger.info("Saved %d predictions to %s", len(predictions), OUT_PATH)
+    logger.info("Experiment log written to %s", LOG_PATH)
 
 if __name__ == "__main__":
     main()
