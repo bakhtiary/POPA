@@ -5,6 +5,6 @@ all or some selected samples.
 
 ```shell
 setup.sh
-uv run run_experiment.py --select-samples 1471 
+uv run run_experiment.py --select-samples 0:1
 ```
 

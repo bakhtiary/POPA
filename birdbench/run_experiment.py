@@ -44,38 +44,42 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the BirdBench experiment.")
     parser.add_argument(
         "--select-samples",
-        action="append",
-        default=[],
-        metavar="QUESTION_ID",
-        help="Run only the specified question_id values. Repeat the flag or pass a comma-separated list.",
+        metavar="START:END",
+        help="Run only the sample range specified as start:end, for example 0:10.",
     )
     return parser.parse_args()
 
 
-def parse_selected_question_ids(raw_values: list[str]) -> set[str]:
-    selected_ids: set[str] = set()
-    for value in raw_values:
-        for item in value.split(","):
-            stripped = item.strip()
-            if stripped:
-                selected_ids.add(stripped)
-    return selected_ids
+def parse_selected_sample_range(raw_value: str | None) -> slice | None:
+    if not raw_value:
+        return None
+
+    start_text, separator, end_text = raw_value.partition(":")
+    if separator != ":":
+        raise ValueError(f"Invalid sample range '{raw_value}'. Expected format start:end.")
+
+    try:
+        start = int(start_text) if start_text else None
+        end = int(end_text) if end_text else None
+    except ValueError as exc:
+        raise ValueError(f"Invalid sample range '{raw_value}'. Expected format start:end.") from exc
+
+    if start is None and end is None:
+        raise ValueError(f"Invalid sample range '{raw_value}'. At least one boundary is required.")
+    if start is not None and end is not None and start > end:
+        raise ValueError(f"Invalid sample range '{raw_value}'. Start must be less than or equal to end.")
+
+    return slice(start, end)
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     args = parse_args()
     samples = json.loads(Path(QUERY_DATABASE).read_text())
-    selected_ids = parse_selected_question_ids(args.select_samples)
+    selected_range = parse_selected_sample_range(args.select_samples)
 
-    if selected_ids:
-        samples = [sample for sample in samples if str(sample["question_id"]) in selected_ids]
-        missing_ids = selected_ids.difference({str(sample["question_id"]) for sample in samples})
-        if missing_ids:
-            print(
-                "Warning: question_id values not found: "
-                + ", ".join(sorted(missing_ids))
-            )
+    if selected_range is not None:
+        samples = samples[selected_range]
 
     predictions = {}
 
