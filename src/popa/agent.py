@@ -1,10 +1,13 @@
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 
 from popa.llm_adapter.interface import LlmAdapter
 from popa.cot_logic import CotLogic
 from popa.message import Message, UserMessage, AssistantMessage, ToolUseMessage, ToolResponseMessage
 from popa.tool import ToolDescription
+
+logger = logging.getLogger(__name__)
 
 
 class Agent:
@@ -45,6 +48,24 @@ class Agent:
     def _add_new_message(self, message):
         self.messages.append(message)
         self.previous_messages.append(message)
+        self._log_new_message(message)
+
+    def _log_new_message(self, message):
+        message_details = {"type": type(message).__name__, "role": getattr(message, "role", None)}
+        if hasattr(message, "content"):
+            message_details["content"] = message.content
+        if hasattr(message, "name"):
+            message_details["name"] = message.name
+        if hasattr(message, "id"):
+            message_details["id"] = message.id
+
+        logger.debug("Adding message: %s", message_details)
+        logger.debug(
+            "Message stored. messages=%d previous_messages=%d",
+            len(self.messages),
+            len(self.previous_messages),
+        )
+
 
     async def ask_async(self, prompt: str, parser_verifier=None):
         parts = []
@@ -57,4 +78,3 @@ class Agent:
 
     def _run_tool(self, name, id_, input_):
         return ToolResponseMessage(id_, self.tools[name].run(input_))
-
