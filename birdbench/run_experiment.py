@@ -8,12 +8,12 @@ from popa.llm_adapter.builder import create_agent
 from popa.response_parser import VerificationException
 from popa.tool import DatabaseTool
 
-DATASET_ROOT = Path(__file__).parent
+DATASET_ROOT = Path(__file__).parent/"AlibabaResearch-DAMO-ConvAI-main-bird"/"llm"/"data"
 
-QUERY_DATABASE = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/mini_dev_sqlite.json"
-DB_ROOT   = DATASET_ROOT / "bird-minidev-XXXXXX/minidev/MINIDEV/dev_databases"
-OUT_PATH  = DATASET_ROOT / "mini_dev/llm/exp_result/my_predictions.json"
-LOG_PATH  = DATASET_ROOT / "run_experiment.log"
+QUERY_DATABASE = DATASET_ROOT / "train.json"
+DB_ROOT   = DATASET_ROOT / "train_databases"
+OUT_PATH  = Path(__file__).parent / "my_predictions.json"
+LOG_PATH  = Path(__file__).parent / "run_experiment.log"
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +94,9 @@ def main():
     samples = json.loads(Path(QUERY_DATABASE).read_text())
     selected_range = parse_selected_sample_range(args.select_samples)
 
+    for i, s in enumerate(samples):
+        s["q_id"] = i
+
     if selected_range is not None:
         samples = samples[selected_range]
         logger.info("Selected sample range %s:%s (%d samples)", selected_range.start, selected_range.stop, len(samples))
@@ -102,9 +105,9 @@ def main():
 
     predictions = {}
 
-    for sample in samples:
+    for sample in  samples:
         db_id    = sample["db_id"]
-        q_id     = sample["question_id"]
+        q_id     = sample["q_id"]
         question = sample["question"]
 
         db_path  = f"{DB_ROOT}/{db_id}/{db_id}.sqlite"
