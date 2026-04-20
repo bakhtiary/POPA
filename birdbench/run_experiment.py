@@ -10,9 +10,9 @@ from popa.tool import DatabaseTool
 
 DATASET_ROOT = Path(__file__).parent/"AlibabaResearch-DAMO-ConvAI-main-bird"/"llm"/"data"
 
-QUERY_DATABASE = DATASET_ROOT / "train.json"
-DB_ROOT   = DATASET_ROOT / "train_databases"
-OUT_PATH  = Path(__file__).parent / "my_predictions.json"
+QUERY_DATABASE = DATASET_ROOT / "mini_dev_sqlite.json"
+DB_ROOT   = DATASET_ROOT / "dev_databases"
+OUT_PATH  = Path(__file__).parent / "predict_mini_dev_sqlite.json"
 LOG_PATH  = Path(__file__).parent / "run_experiment.log"
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,6 @@ def main():
         s["q_id"] = i
 
     if selected_range is not None:
-        samples = samples[selected_range]
         logger.info("Selected sample range %s:%s (%d samples)", selected_range.start, selected_range.stop, len(samples))
     else:
         logger.info("Running all samples (%d samples)", len(samples))
@@ -110,13 +109,15 @@ def main():
         q_id     = sample["q_id"]
         question = sample["question"]
 
-        db_path  = f"{DB_ROOT}/{db_id}/{db_id}.sqlite"
-        logger.info("Running sample question_id=%s db_id=%s db_path=%s", q_id, db_id, db_path)
-        conn     = sqlite3.connect(db_path)
 
-        sql = my_model(question, None, conn)
-        conn.close()
-
+        if sample in samples[selected_range]:
+            db_path  = f"{DB_ROOT}/{db_id}/{db_id}.sqlite"
+            logger.info("Running sample question_id=%s db_id=%s db_path=%s", q_id, db_id, db_path)
+            conn     = sqlite3.connect(db_path)
+            sql = my_model(question, None, conn)
+            conn.close()
+        else:
+            sql = "No sql query generated"
         predictions[str(q_id)] = f"{sql}\t----- bird -----\t{db_id}"
         logger.info("Completed sample question_id=%s db_id=%s sql=%s", q_id, db_id, sql[:80])
 
