@@ -26,6 +26,10 @@ class Tool:
     def get_tool_description(self) -> ToolDescription:
         ...
 
+    def run(self, intput_ : dict[str,str]) -> str:
+        ...
+
+
 class SqliteDatabaseTool(Tool):
 
     def __init__(self, conn: sqlite3.Connection, name):
@@ -52,7 +56,7 @@ class SqliteDatabaseTool(Tool):
             ],
         )
 
-    def run(self, input_):
+    def run(self, input_: dict[str,str])-> str:
         try:
             return str(self.conn.execute(input_["query"]).fetchall())
         except Exception as e:

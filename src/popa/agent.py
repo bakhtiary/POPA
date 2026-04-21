@@ -5,13 +5,18 @@ from collections.abc import AsyncIterator
 from popa.llm_adapter.interface import LlmAdapter
 from popa.cot_logic import CotLogic
 from popa.message import Message, UserMessage, AssistantMessage, ToolUseMessage, ToolResponseMessage
-from popa.tool import ToolDescription
+from popa.tool import Tool
 
 logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, instruction: str, adapter: LlmAdapter, cot_logic: CotLogic, tools: list[ToolDescription]) -> None:
+    def __init__(self,
+                 instruction: str,
+                 adapter: LlmAdapter,
+                 cot_logic: CotLogic,
+                 tools: list[Tool],
+                 max_tool_output = 1000):
         self.adapter: LlmAdapter = adapter
         self.system_instruction = instruction
         self.messages: list[Message] = []
@@ -19,6 +24,7 @@ class Agent:
         self.previous_messages = []
         self.cot_logic: CotLogic = cot_logic
         self.tools = {x.name:x for x in tools}
+        self.max_tool_output = max_tool_output
 
     async def ask_stream(self, prompt: str, parser_verifier=None) -> AsyncIterator[str]:
         self.previous_messages = []
@@ -34,7 +40,7 @@ class Agent:
             for message in model_messages:
                 self._add_new_message(message)
                 if isinstance(message, ToolUseMessage):
-                    tool_response = self._run_tool(message.name, message.id,message.input)
+                    tool_response = self._run_tool(message.name, message.id, message.input)
                     self._add_new_message(tool_response)
 
             last_message = self.messages[-1]
@@ -77,4 +83,9 @@ class Agent:
         return asyncio.run(self.ask_async(prompt, parser_verifier))
 
     def _run_tool(self, name, id_, input_):
-        return ToolResponseMessage(id_, self.tools[name].run(input_))
+        tool_output = self.tools[name].run(input_)
+        if len(tool_output) > self.max_tool_output:
+            tool_output = f"""tool_response is too large, and it is truncated to self.max_tool_output
+                            {tool_output[0: self.max_tool_output]}"""
+        return ToolResponseMessage(id_, tool_output)
+
