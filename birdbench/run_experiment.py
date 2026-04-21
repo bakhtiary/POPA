@@ -12,7 +12,7 @@ DATASET_ROOT = Path(__file__).parent/"AlibabaResearch-DAMO-ConvAI-main-bird"/"ll
 
 QUERY_DATABASE = DATASET_ROOT / "mini_dev_sqlite.json"
 DB_ROOT   = DATASET_ROOT / "dev_databases"
-OUT_PATH  = Path(__file__).parent / "predict_mini_dev_sqlite.json"
+OUT_PATH  = Path(__file__).parent / "AlibabaResearch-DAMO-ConvAI-main-bird"/"llm"/"exp_result"/"popa"/"predict_mini_dev_sqlite.json"
 LOG_PATH  = Path(__file__).parent / "run_experiment.log"
 
 logger = logging.getLogger(__name__)
