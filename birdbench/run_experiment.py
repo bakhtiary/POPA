@@ -6,7 +6,7 @@ from pathlib import Path
 
 from popa.llm_adapter.builder import create_agent
 from popa.response_parser import VerificationException
-from popa.tool import DatabaseTool
+from popa.tool import SqliteDatabaseTool
 
 DATASET_ROOT = Path(__file__).parent/"AlibabaResearch-DAMO-ConvAI-main-bird"/"llm"/"data"
 
@@ -35,7 +35,7 @@ def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
     You are a database assistant that has access to a sqlite database. 
     Provide concise answers to the questions that you are asked.
     Use the provided database tool to query the database when needed.
-    """, tools=[DatabaseTool(db_conn, "sqlite3")]
+    """, tools=[SqliteDatabaseTool(db_conn, "sqlite3")]
     )
 
     agent.ask(f"can you answer this question using the available database tool:{question}")

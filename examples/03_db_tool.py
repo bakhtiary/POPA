@@ -3,7 +3,7 @@ import sqlite3
 import urllib
 
 from popa.llm_adapter.builder import create_agent
-from popa.tool import DatabaseTool
+from popa.tool import SqliteDatabaseTool
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     You are a database assistant that has access to a chinook sqlite database. 
     Provide concise answers to the questions that you are asked.
     Use the provided database tool to query the database when needed.
-    """, tools=[DatabaseTool(conn, "sqlite3")]
+    """, tools=[SqliteDatabaseTool(conn, "sqlite3")]
     )
 
     result = agent.ask("how many albums did AC/DC publish?")

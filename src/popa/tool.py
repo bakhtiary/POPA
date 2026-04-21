@@ -26,7 +26,7 @@ class Tool:
     def get_tool_description(self) -> ToolDescription:
         ...
 
-class DatabaseTool(Tool):
+class SqliteDatabaseTool(Tool):
 
     def __init__(self, conn: sqlite3.Connection, name):
         super().__init__(name)

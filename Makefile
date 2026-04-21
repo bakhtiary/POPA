@@ -9,3 +9,6 @@ run-example:
 	docker run --rm -it -p 8000:8000 \
 		--env-file $(ENV_FILE) \
 		$(IMAGE) python examples/$(EXAMPLE)
+
+run-tests:
+     uv run pytest tests

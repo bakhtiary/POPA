@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 from popa.llm_adapter.builder import create_agent
-from popa.tool import DatabaseTool
+from popa.tool import SqliteDatabaseTool
 
 
 def read_env_vars_file():
@@ -27,7 +27,7 @@ class TestAdaptersEndToEnd(unittest.TestCase):
         agent = create_agent(system_instructions="""
         You are a database assistant. Provide accurate answers regarding the database provided.
         Always think before you use the tool.
-        """, tools=[DatabaseTool(conn, "sqlite3")])
+        """, tools=[SqliteDatabaseTool(conn, "sqlite3")])
         result = agent.ask("What tables does the database have?")
 
         self.assertIn("users", result)
@@ -36,7 +36,7 @@ class TestAdaptersEndToEnd(unittest.TestCase):
         conn = create_and_fill_memory_database()
 
         agent = create_agent(system_instructions="""You are a database assistant. Provide accurate answers regarding the database provided.
-        """, tools=[DatabaseTool(conn, "sqlite3")]
+        """, tools=[SqliteDatabaseTool(conn, "sqlite3")]
         )
         agent.ask("What tables does the database have?")
         result = agent.ask("Which table has a postcode column?")
