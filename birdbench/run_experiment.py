@@ -79,11 +79,14 @@ def parse_selected_sample_range(raw_value: str | None) -> slice | None:
 def setup_logging() -> None:
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
         handlers=[logging.FileHandler(LOG_PATH, mode="w", encoding="utf-8")],
         force=True,
     )
+    import popa.agent
+    logging.getLogger(popa.agent.__name__).setLevel(logging.DEBUG)
+
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

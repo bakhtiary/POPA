@@ -64,6 +64,10 @@ class Agent:
             message_details["name"] = message.name
         if hasattr(message, "id"):
             message_details["id"] = message.id
+        if hasattr(message, "input"):
+            message_details["input"] = message.input
+        if hasattr(message, "result"):
+            message_details["result"] = message.result
 
         logger.debug("Adding message: %s", message_details)
         logger.debug(
@@ -85,7 +89,7 @@ class Agent:
     def _run_tool(self, name, id_, input_):
         tool_output = self.tools[name].run(input_)
         if len(tool_output) > self.max_tool_output:
-            tool_output = f"""tool_response is too large, and it is truncated to self.max_tool_output
+            tool_output = f"""tool_response is too large, and it is truncated to {self.max_tool_output} characters:
                             {tool_output[0: self.max_tool_output]}"""
         return ToolResponseMessage(id_, tool_output)
 
