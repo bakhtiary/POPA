@@ -1,7 +1,8 @@
 from collections.abc import AsyncIterator
+from copy import deepcopy
 
 from anthropic import AsyncAnthropic
-from anthropic.types import ToolParam
+from anthropic.types import ToolParam, CacheControlEphemeralParam
 
 from popa.llm_adapter.local_disk_cache import LocalDiskCache
 from popa.message import Message, ToolUseMessage, AssistantMessage, ToolResponseMessage, UserMessage, CotLogicMessage
@@ -33,7 +34,9 @@ class ClaudeAdapter:
 
         if not cached:
             text_stream = []
+            cl_msg = add_cache_control_to_messages(cl_msg)
             async with self.client.messages.stream(
+                cache_control=CacheControlEphemeralParam(type="ephemeral"),
                 max_tokens=max_tokens,
                 model=model_name,
                 messages=cl_msg,
@@ -143,6 +146,41 @@ def popa_messages_to_claude_mapper(chat_history):
 
     return messages
 
+CACHEABLE_TYPES = {"text", "image", "document"}
+
+def add_cache_control_to_messages(messages, num_breakpoints: int = 3):
+    """
+    Places cache breakpoints at the last `num_breakpoints` eligible positions
+    in the message list, working backwards. This caches the stable prefix
+    of the conversation.
+    """
+    cached_messages = deepcopy(messages)
+    breakpoints_set = 0
+
+    for message in reversed(cached_messages):
+        if breakpoints_set >= num_breakpoints:
+            break
+
+        content = message["content"]
+
+        if isinstance(content, str):
+            message["content"] = [{
+                "type": "text",
+                "text": content,
+                "cache_control": {"type": "ephemeral"},
+            }]
+            breakpoints_set += 1
+            continue
+
+        # Walk backwards through blocks to find a cacheable one
+        for block in reversed(content):
+            if block.get("type") in CACHEABLE_TYPES:
+                block["cache_control"] = {"type": "ephemeral"}
+                breakpoints_set += 1
+                break  # one breakpoint per message
+
+    return cached_messages
+
 def claude_to_popa_messages_mapper(block):
     match block.type:
         case "tool_use":
@@ -151,6 +189,5 @@ def claude_to_popa_messages_mapper(block):
             return AssistantMessage(block.text)
         case _:
             raise NotImplementedError()
-
 
 
