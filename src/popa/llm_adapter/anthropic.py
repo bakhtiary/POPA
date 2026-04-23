@@ -148,11 +148,10 @@ def popa_messages_to_claude_mapper(chat_history):
 
 CACHEABLE_TYPES = {"text", "image", "document"}
 
-def add_cache_control_to_messages(messages, num_breakpoints: int = 3):
+def add_cache_control_to_messages(messages, num_breakpoints: int = 1):
     """
     Places cache breakpoints at the last `num_breakpoints` eligible positions
-    in the message list, working backwards. This caches the stable prefix
-    of the conversation.
+    in the message list, working backwards.
     """
     cached_messages = deepcopy(messages)
     breakpoints_set = 0
@@ -189,5 +188,4 @@ def claude_to_popa_messages_mapper(block):
             return AssistantMessage(block.text)
         case _:
             raise NotImplementedError()
-
 

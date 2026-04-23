@@ -10,5 +10,6 @@ run-example:
 		--env-file $(ENV_FILE) \
 		$(IMAGE) python examples/$(EXAMPLE)
 
+
 run-tests:
-     uv run pytest tests
+	uv run pytest tests
