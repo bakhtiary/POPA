@@ -2,14 +2,15 @@ from collections.abc import AsyncIterator
 from copy import deepcopy
 
 from anthropic import AsyncAnthropic
-from anthropic.types import ToolParam, CacheControlEphemeralParam
+from anthropic.types import ToolParam, CacheControlEphemeralParam, TextBlockParam
 
+from popa.llm_adapter.interface import LlmAdapter
 from popa.llm_adapter.local_disk_cache import LocalDiskCache
 from popa.message import Message, ToolUseMessage, AssistantMessage, ToolResponseMessage, UserMessage, CotLogicMessage
 from popa.tool import ToolDescription, Tool
 
 
-class ClaudeAdapter:
+class ClaudeAdapter(LlmAdapter):
     def __init__(self, api_key: str):
         self.client = AsyncAnthropic(api_key=api_key)
         self.previous_response=None
@@ -18,13 +19,12 @@ class ClaudeAdapter:
     def get_previous_response(self):
         return self.previous_response
 
-    async def stream(self, system, messages: list[Message], tools:list[Tool]) -> AsyncIterator[str]:
+    async def stream(self, system: str, messages: list[Message], tools:list[Tool]) -> AsyncIterator[str]:
         cl_msg = popa_messages_to_claude_mapper(messages)
         cl_tools = all_tools_to_claude(tools)
 
         model_name = "claude-opus-4-6"
         max_tokens = 1024
-
         cached, key = self.client_cacher.get_cached(dict(max_tokens=max_tokens,
             model=model_name,
             messages=cl_msg,
@@ -34,7 +34,6 @@ class ClaudeAdapter:
 
         if not cached:
             text_stream = []
-            cl_msg = add_cache_control_to_messages(cl_msg)
             async with self.client.messages.stream(
                 cache_control=CacheControlEphemeralParam(type="ephemeral"),
                 max_tokens=max_tokens,
@@ -148,38 +147,6 @@ def popa_messages_to_claude_mapper(chat_history):
 
 CACHEABLE_TYPES = {"text", "image", "document"}
 
-def add_cache_control_to_messages(messages, num_breakpoints: int = 1):
-    """
-    Places cache breakpoints at the last `num_breakpoints` eligible positions
-    in the message list, working backwards.
-    """
-    cached_messages = deepcopy(messages)
-    breakpoints_set = 0
-
-    for message in reversed(cached_messages):
-        if breakpoints_set >= num_breakpoints:
-            break
-
-        content = message["content"]
-
-        if isinstance(content, str):
-            message["content"] = [{
-                "type": "text",
-                "text": content,
-                "cache_control": {"type": "ephemeral"},
-            }]
-            breakpoints_set += 1
-            continue
-
-        # Walk backwards through blocks to find a cacheable one
-        for block in reversed(content):
-            if block.get("type") in CACHEABLE_TYPES:
-                block["cache_control"] = {"type": "ephemeral"}
-                breakpoints_set += 1
-                break  # one breakpoint per message
-
-    return cached_messages
-
 def claude_to_popa_messages_mapper(block):
     match block.type:
         case "tool_use":
@@ -188,4 +155,3 @@ def claude_to_popa_messages_mapper(block):
             return AssistantMessage(block.text)
         case _:
             raise NotImplementedError()
-

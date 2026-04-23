@@ -2,6 +2,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
+from popa.llm_adapter.interface import LlmAdapter
 from popa.llm_adapter.local_disk_cache import LocalDiskCache
 from popa.message import AssistantMessage, Message, ToolResponseMessage, ToolUseMessage
 from popa.tool import Tool, ToolDescription
@@ -12,7 +13,7 @@ except ImportError:  # pragma: no cover - exercised indirectly by __init__
     AsyncOpenAI = None
 
 
-class OpenAIAdapter:
+class OpenAIAdapter(LlmAdapter):
     def __init__(self, api_key: str, model_name: str = "gpt-4.1"):
         if AsyncOpenAI is None:
             raise ImportError(
@@ -28,7 +29,7 @@ class OpenAIAdapter:
     def get_previous_response(self):
         return self.previous_response
 
-    async def stream(self, system, messages: list[Message], tools: list[Tool]) -> AsyncIterator[str]:
+    async def stream(self, system: str, messages: list[Message], tools: list[Tool]) -> AsyncIterator[str]:
         oa_messages = popa_messages_to_openai_mapper(system, messages)
         oa_tools = all_tools_to_openai(tools)
         max_completion_tokens = 1024

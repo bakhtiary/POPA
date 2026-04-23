@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from typing import Any
 
+from popa.llm_adapter.interface import LlmAdapter
 from popa.llm_adapter.local_disk_cache import LocalDiskCache
 from popa.message import AssistantMessage, Message, ToolResponseMessage, ToolUseMessage, CotLogicMessage
 from popa.tool import Tool, ToolDescription
@@ -13,7 +14,7 @@ except ImportError:  # pragma: no cover - exercised indirectly by __init__
     types = None
 
 
-class GeminiAdapter:
+class GeminiAdapter(LlmAdapter):
     def __init__(self, api_key: str, model_name: str = "gemini-2.5-pro"):
         if genai is None or types is None:
             raise ImportError(
@@ -29,7 +30,7 @@ class GeminiAdapter:
     def get_previous_response(self):
         return self.previous_response
 
-    async def stream(self, system, messages: list[Message], tools: list[Tool]) -> AsyncIterator[str]:
+    async def stream(self, system: str, messages: list[Message], tools: list[Tool]) -> AsyncIterator[str]:
         gm_messages = popa_messages_to_gemini_mapper(messages)
         gm_tools = all_tools_to_gemini(tools)
         config = _build_generation_config(system, gm_tools)

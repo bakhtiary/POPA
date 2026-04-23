@@ -9,7 +9,7 @@ class FakeStreamingAdapter(LlmAdapter):
         self.messages2 = messages2
         self.call_count = 0
         self.calls = []
-    async def stream(self, system, messages, tools):
+    async def stream(self, system: str, messages, tools):
         self.calls.append(messages)
         self.call_count += 1
         message = ""
@@ -37,7 +37,7 @@ class FakeSimpleStreamingAdapter(LlmAdapter):
         self.last_received_messages = None
         self.call_count = 0
 
-    async def stream(self, system, messages, tools):
+    async def stream(self, system: str, messages, tools):
         self.last_received_messages = messages
         for text in ["some", "random", "text"]:
             yield text
@@ -48,4 +48,3 @@ class FakeSimpleStreamingAdapter(LlmAdapter):
 
     def get_previous_response(self):
         return self.previous
-
