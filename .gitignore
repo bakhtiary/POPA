@@ -5,3 +5,11 @@ __pycache__
 .env
 examples/chinook.db
 .codex
+
+# Local adapter/test caches
+cache/
+tests/cache/
+
+# BirdBench downloaded databases and local experiment outputs
+birdbench/AlibabaResearch-DAMO-ConvAI-main-bird/llm/data/dev_databases/
+birdbench/AlibabaResearch-DAMO-ConvAI-main-bird/llm/exp_result/popa/

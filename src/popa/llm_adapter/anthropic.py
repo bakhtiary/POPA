@@ -23,7 +23,7 @@ class ClaudeAdapter(LlmAdapter):
         cl_msg = popa_messages_to_claude_mapper(messages)
         cl_tools = all_tools_to_claude(tools)
 
-        model_name = "claude-opus-4-6"
+        model_name = "claude-haiku-4-5-20251001"
         max_tokens = 1024
         cached, key = self.client_cacher.get_cached(dict(max_tokens=max_tokens,
             model=model_name,
