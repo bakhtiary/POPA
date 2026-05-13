@@ -43,17 +43,17 @@ class DatabaseVerifier(object):
             raise VerificationException(e)
 
 
-def my_model(question: str, schema: str, db_conn: sqlite3.Connection) -> str:
+def my_model(question: str, schema: str, evidence: str, db_conn: sqlite3.Connection) -> str:
 
     agent = create_agent(system_instructions="""
     You are a database assistant that has access to a sqlite database. 
-    Provide concise answers to the questions that you are asked.
+    You are to provide correct answers to the questions that you are asked. There will be a hint that can help disambiguate the question and guide you towards the correct answer.
     Use the provided database tool to query the database when needed.
     """, tools=[SqliteDatabaseTool(db_conn, "sqlite3")]
     )
 
-    agent.ask(f"can you answer this question using the available database tool:{question}")
-    result = agent.ask("please give the sql query that provides the correct answer.", parser_verifier=DatabaseVerifier(db_conn))
+    agent.ask(f"Can you answer this question using the available database tool: {question}.\n Hint: {evidence}")
+    result = agent.ask("Please give the sql query that provides the correct answer.", parser_verifier=DatabaseVerifier(db_conn))
 
     return result
 
@@ -125,13 +125,13 @@ def main():
         db_id    = sample["db_id"]
         q_id     = sample["q_id"]
         question = sample["question"]
-
+        evidence = sample["evidence"]
 
         if sample in samples[selected_range]:
             db_path  = f"{DB_ROOT}/{db_id}/{db_id}.sqlite"
             logger.info("Running sample question_id=%s db_id=%s db_path=%s", q_id, db_id, db_path)
             conn     = sqlite3.connect(db_path)
-            sql = my_model(question, None, conn)
+            sql = my_model(question, None, evidence, conn)
             conn.close()
         else:
             sql = "No sql query generated"
