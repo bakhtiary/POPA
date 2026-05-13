@@ -23,7 +23,14 @@ class DatabaseVerifier(object):
 
     def parse(self, answer: str):
         try:
-            self.db_conn.execute(answer)
+            res = self.db_conn.execute(answer)
+            error_msg = []
+            if "ROUND" in answer:
+                error_msg.append("Do not ROUND the result. please provide the raw results without extra processing.")
+            if len (res.fetchone()) > 1:
+                error_msg.append("The provided sql gives a result with more than one column. The expected sql to the question ask requires exactly one column.")
+            if error_msg:
+                raise VerificationException(" ".join(error_msg))
             return answer
         except Exception as e:
             raise VerificationException(e)
