@@ -4,16 +4,23 @@ import logging
 import sqlite3
 from pathlib import Path
 
+from observability_tools.run_experiment_viewer_api import build_viewer
 from popa.llm_adapter.builder import create_agent
 from popa.response_parser import VerificationException
 from popa.tool import SqliteDatabaseTool
+from run_artifact_store import archive_run_artifacts
+from sql_result_evaluator import evaluate_predictions, write_evaluation_report
 
 DATASET_ROOT = Path(__file__).parent/"AlibabaResearch-DAMO-ConvAI-main-bird"/"llm"/"data"
 
 QUERY_DATABASE = DATASET_ROOT / "mini_dev_sqlite.json"
 DB_ROOT   = DATASET_ROOT / "dev_databases"
-OUT_PATH  = Path(__file__).parent / "AlibabaResearch-DAMO-ConvAI-main-bird"/"llm"/"exp_result"/"popa"/"predict_mini_dev_sqlite.json"
-LOG_PATH  = Path(__file__).parent / "run_experiment.log"
+RESULTS_DIRECTORY = Path(__file__).parent / "AlibabaResearch-DAMO-ConvAI-main-bird" / "llm" / "exp_result" / "popa"
+RUNS_DIRECTORY = RESULTS_DIRECTORY / "runs"
+OUT_PATH  = RESULTS_DIRECTORY / "predict_mini_dev_sqlite.json"
+RESULTS_PATH = RESULTS_DIRECTORY / "predict_mini_dev_sqlite_results.json"
+LOG_PATH  = RESULTS_DIRECTORY / "run_experiment.log"
+VIEWER_PATH = Path(__file__).parent / "observability_tools" / "run_experiment_viewer.html"
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +141,37 @@ def main():
     Path(OUT_PATH).parent.mkdir(parents=True, exist_ok=True)
     Path(OUT_PATH).write_text(json.dumps(predictions, indent=2))
     logger.info("Saved %d predictions to %s", len(predictions), OUT_PATH)
+    logger.info("Starting SQL result evaluation")
+
+    evaluation_report = evaluate_predictions(predictions=predictions, samples=samples, db_root=DB_ROOT)
+    write_evaluation_report(evaluation_report, RESULTS_PATH)
+
+    summary = evaluation_report["summary"]
+    logger.info(
+        "Evaluation complete: matched %d/%d (%.2f%%). Report written to %s",
+        summary["matched_count"],
+        summary["evaluated_count"],
+        summary["matched_percent"],
+        RESULTS_PATH,
+    )
+    run_dir = archive_run_artifacts(
+        runs_root=RUNS_DIRECTORY,
+        predictions_path=OUT_PATH,
+        results_path=RESULTS_PATH,
+        log_path=LOG_PATH,
+        selected_samples=args.select_samples,
+        summary=summary,
+    )
+    logger.info("Archived run artifacts to %s", run_dir)
+    viewer_payload = build_viewer(RESULTS_DIRECTORY, VIEWER_PATH)
+    logger.info("Viewer refreshed at %s with %d runs", VIEWER_PATH, len(viewer_payload["runs"]))
     logger.info("Experiment log written to %s", LOG_PATH)
+    print(
+        "SQL result match rate: "
+        f"{summary['matched_count']}/{summary['evaluated_count']} "
+        f"({summary['matched_percent']:.2f}%)"
+    )
+    print(f"Run viewer: {VIEWER_PATH}")
 
 if __name__ == "__main__":
     main()

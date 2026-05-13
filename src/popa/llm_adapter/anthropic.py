@@ -1,5 +1,5 @@
+import logging
 from collections.abc import AsyncIterator
-from copy import deepcopy
 
 from anthropic import AsyncAnthropic
 from anthropic.types import ToolParam, CacheControlEphemeralParam, TextBlockParam
@@ -8,6 +8,8 @@ from popa.llm_adapter.interface import LlmAdapter
 from popa.llm_adapter.local_disk_cache import LocalDiskCache
 from popa.message import Message, ToolUseMessage, AssistantMessage, ToolResponseMessage, UserMessage, CotLogicMessage
 from popa.tool import ToolDescription, Tool
+
+logger = logging.getLogger(__name__)
 
 
 class ClaudeAdapter(LlmAdapter):
@@ -33,6 +35,7 @@ class ClaudeAdapter(LlmAdapter):
         )
 
         if not cached:
+            logger.info("Cache miss")
             text_stream = []
             async with self.client.messages.stream(
                 cache_control=CacheControlEphemeralParam(type="ephemeral"),
@@ -50,6 +53,7 @@ class ClaudeAdapter(LlmAdapter):
             final_messages = await stream.get_final_message()
             self.client_cacher.cache(key, text_stream, final_messages)
         else:
+            logger.info("Cache hit")
             for text in cached["text_stream"]:
                 yield text
 
