@@ -11,7 +11,7 @@ POJOs encouraged people to build software. The goal is to have simple, explicit,
 ## Examples
 
 Using the library is as simple as:
-```
+```python
 from popa.llm_adapter.builder import create_agent
 agent = create_agent(system_instructions="You are a helpful greeter. Greet incoming people.")
 result = agent.ask("A man arrives what do you say to him?")
