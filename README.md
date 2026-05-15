@@ -18,7 +18,7 @@ result = agent.ask("A man arrives what do you say to him?")
 print(result)
 ```
 
-Checkout the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
+Checkout the [examples](./examples) directory to see how to use the system with gemini, chatgpt, and fastapi.
 
 ## Installation
 
