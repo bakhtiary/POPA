@@ -6,8 +6,7 @@ POPA stands for **Plain Old Procedural Agents**.
 The project is inspired by the idea behind **POJOs**: Plain Old Java Objects. POJOs became useful because they pushed back against heavyweight frameworks, hidden conventions, and unnecessary abstractions. Instead of forcing developers to model everything through special containers or framework-specific base classes, POJOs let code stay close to the language itself.
 
 POPA applies the same instinct to agents. In short POPA is an attempt to build agents the way
-POJOs encouraged people to build software: with simple, explicit, language-native code first, 
-and only as much abstraction as the problem actually needs.
+POJOs encouraged people to build software. The goal is to have simple, explicit, code first function calls and only add abstractions that is needed for these simple function calls to complete.
 
 ## Installation
 
