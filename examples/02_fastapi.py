@@ -27,7 +27,7 @@ def health() -> dict[str, str]:
 @app.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
     agent = create_agent(system_instructions="you are an agent designed to say hello to people")
-    return AskResponse(result=agent.ask(request.prompt))
+    return AskResponse(result=agent.ask(request.prompt).answer)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)

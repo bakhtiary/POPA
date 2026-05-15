@@ -19,7 +19,7 @@ class TestAdaptersEndToEnd(unittest.TestCase):
     def test_happy_path(self):
         agent = create_agent(system_instructions="You are a helpful greeter. What ever the question answer with one word: hello")
         result = agent.ask("A man arrives what do you say to him?")
-        self.assertIn("hello", result)
+        self.assertIn("hello", result.answer.lower())
 
     def test_thinking_before_tool_use(self):
         conn = create_and_fill_memory_database()
@@ -30,7 +30,7 @@ class TestAdaptersEndToEnd(unittest.TestCase):
         """, tools=[SqliteDatabaseTool(conn, "sqlite3")])
         result = agent.ask("What tables does the database have?")
 
-        self.assertIn("users", result)
+        self.assertIn("users", result.answer.lower())
 
     def test_multiple_sql_uses(self):
         conn = create_and_fill_memory_database()
@@ -41,8 +41,8 @@ class TestAdaptersEndToEnd(unittest.TestCase):
         agent.ask("What tables does the database have?")
         result = agent.ask("Which table has a postcode column?")
 
-        self.assertIn("address", result)
-        self.assertNotIn("users", result)
+        self.assertIn("address", result.answer.lower())
+        self.assertNotIn("users", result.answer.lower())
 
 
 def create_and_fill_memory_database():

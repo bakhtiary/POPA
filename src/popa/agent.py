@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from collections.abc import AsyncIterator
+from dataclasses import dataclass
 
 from popa.llm_adapter.interface import LlmAdapter
 from popa.cot_logic import CotLogic
@@ -9,6 +10,14 @@ from popa.tool import Tool
 
 logger = logging.getLogger(__name__)
 
+MAX_ITERATIONS_ERROR = "max_iterations_per_question_limit_reached"
+
+@dataclass
+class AgentResult:
+    ok: bool
+    answer: str | None = None
+    error_code: str | None = None
+
 
 class Agent:
     def __init__(self,
@@ -16,7 +25,8 @@ class Agent:
                  adapter: LlmAdapter,
                  cot_logic: CotLogic,
                  tools: list[Tool],
-                 max_tool_output = 1000):
+                 max_tool_output = 1000,
+                 max_iterations_per_question=20):
         self.adapter: LlmAdapter = adapter
         self.system_instruction = instruction
         self.messages: list[Message] = []
@@ -25,13 +35,19 @@ class Agent:
         self.cot_logic: CotLogic = cot_logic
         self.tools = {x.name:x for x in tools}
         self.max_tool_output = max_tool_output
+        self.max_iterations_per_question = max_iterations_per_question
 
     async def ask_stream(self, prompt: str, parser_verifier=None) -> AsyncIterator[str]:
         self.previous_messages = []
         self._add_new_message(UserMessage(prompt))
 
         cot_resp = None
+        iter_count = 1
         while not cot_resp:
+            if iter_count >= self.max_iterations_per_question:
+                self.previous_response = AgentResult(False, None, MAX_ITERATIONS_ERROR)
+                return
+            iter_count += 1
             async for chunk in self.adapter.stream(self.system_instruction+self.cot_logic.get_cot_system_message(), self.messages, tools=list(self.tools.values())):
                 yield chunk
 
@@ -49,7 +65,7 @@ class Agent:
                 if cot_message:
                     self._add_new_message(cot_message)
 
-        self.previous_response = cot_resp
+        self.previous_response = AgentResult(True, cot_resp)
 
     def _add_new_message(self, message):
         self.messages.append(message)
@@ -77,13 +93,13 @@ class Agent:
         )
 
 
-    async def ask_async(self, prompt: str, parser_verifier=None):
+    async def ask_async(self, prompt: str, parser_verifier=None) -> AgentResult:
         parts = []
         async for chunk in self.ask_stream(prompt, parser_verifier):
             parts.append(chunk)
         return self.previous_response
 
-    def ask(self, prompt: str, parser_verifier=None):
+    def ask(self, prompt: str, parser_verifier=None) -> AgentResult:
         return asyncio.run(self.ask_async(prompt, parser_verifier))
 
     def _run_tool(self, name, id_, input_):

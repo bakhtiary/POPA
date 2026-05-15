@@ -8,4 +8,4 @@ if __name__ == '__main__':
 
     result = agent.ask("A man arrives what do you say to him?")
 
-    print(result)
+    print(result.answer)

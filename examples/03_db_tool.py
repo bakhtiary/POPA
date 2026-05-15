@@ -18,7 +18,7 @@ def main():
 
     result = agent.ask("how many albums did AC/DC publish?")
 
-    print(result)
+    print(result.answer)
 
 
 def _get_chinook_sqlite_db_conn_download_if_it_dont_exist():
