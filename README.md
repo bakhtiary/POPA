@@ -8,6 +8,18 @@ The project is inspired by the idea behind **POJOs**: Plain Old Java Objects. PO
 POPA applies the same instinct to agents. In short POPA is an attempt to build agents the way
 POJOs encouraged people to build software. The goal is to have simple, explicit, code first function calls and only add abstractions that is needed for these simple function calls to complete.
 
+## Examples
+
+Using the library is as simple as:
+```
+from popa.llm_adapter.builder import create_agent
+agent = create_agent(system_instructions="You are a helpful greeter. Greet incoming people.")
+result = agent.ask("A man arrives what do you say to him?")
+print(result)
+```
+
+Checkout the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
+
 ## Installation
 
 POPA requires Python 3.11 or newer.
@@ -23,10 +35,6 @@ Or install it with `uv`:
 ```bash
 uv add git+https://github.com/bakhtiary/POPA.git@v0.1.0
 ```
-
-## Examples
-
-See the [examples](./examples) directory for small scripts that show how to define and run POPA agents with normal Python functions.
 
 ## Why POPA
 
